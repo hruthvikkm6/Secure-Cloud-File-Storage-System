@@ -1,4 +1,4 @@
-# Mini Google Drive 🚀
+# Secure Cloud File Storage System 🚀
 
 [![FastAPI](https://img.shields.io/badge/Backend-FastAPI-05998B?logo=fastapi&logoColor=white)](#)
 [![React](https://img.shields.io/badge/Frontend-React-61DAFB?logo=react&logoColor=black)](#)
@@ -7,7 +7,7 @@
 [![JWT](https://img.shields.io/badge/Auth-JWT-000000?logo=jsonwebtokens&logoColor=white)](#)
 [![Security](https://img.shields.io/badge/Security-Argon2%20%7C%20AES--CBC-8A2BE2)](#)
 
-A production‑minded, secure file storage app — a "mini Google Drive" — built with a modern stack:
+A production-minded, secure cloud file storage system inspired by Google Drive, built with a modern, security-first stack:
 
 - FastAPI + SQLAlchemy (Python) for a typed, high‑performance API
 - React + Vite (TypeScript) for a crisp UX
@@ -51,16 +51,6 @@ This separation keeps the system modular, easy to test, and production-ready.
 4. Files are encrypted/decrypted on demand before storage or download.
 
 
-## 🖼️ Demo & Screens
-
-Add screenshots or a short GIF under `docs/` and link them here:
-
-```
-/docs/demo.gif
-/docs/screen-dashboard.png
-/docs/screen-login.png
-```
-
 ## 🚀 Quick Start (Docker)
 
 1) Copy and edit environment file:
@@ -77,7 +67,7 @@ docker-compose up --build
 - Frontend: http://localhost:8080
 - Backend (direct): http://localhost:8000
 
-Data persistence: a Docker volume holds `mini_google_drive.db` (SQLite) across restarts.
+Data persistence: a Docker volume holds `secure_cloud_storage.db` (SQLite) across restarts.
 
 ## 🧪 Local Development (no Docker)
 
@@ -273,4 +263,12 @@ frontend/
 ## 🙌 Contributing
 
 Issues and PRs are welcome. Roadmap items are great places to start.
+
+### 👤 Author
+
+**Hruthvik K M**  
+- 🔗 LinkedIn: https://www.linkedin.com/in/hruthvikkm/  
+- 💻 GitHub: https://github.com/hruthvikkm6  
+- 📦 Project Repo: https://github.com/hruthvikkm6/Secure-Cloud-File-Storage-System
+
 
