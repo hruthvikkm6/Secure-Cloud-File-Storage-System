@@ -22,26 +22,34 @@ A production‑minded, secure file storage app — a "mini Google Drive" — bui
 - New: Download, Delete, and Preview (image/pdf) with ownership checks
 - Dev experience: hot reloads, Vite proxy for zero‑CORS friction
 
-## 🧩 Architecture
+## 🧩 Architecture Overview
 
-```
-+---------------------+        /api/v1        +--------------------+        +----------------------+
-|   React (Vite)      |  ───────────────────▶ |    FastAPI         |  ───▶  |  SQLite (SQLAlchemy) |
-|   - Auth pages       |                      |    - Auth, Files    |        +----------------------+
-|   - Dashboard        | ◀─────────────────── |    - JWT Security   |
-+---------------------+     JSON (Axios)      +--------------------+
-         │                                                     
-         │ (Docker)                                            
-         ▼                                                     
-+---------------------+   reverse proxy + static               
-|      Nginx          |  ─────────────────────────────────────▶ Serves SPA and proxies /api → backend
-+---------------------+
-```
+The application follows a simple and practical client–server architecture.
 
-Request flow (upload/download/preview):
-1) User logs in → receives JWT
-2) Upload: user selects file + enters password → backend derives key (PBKDF2), encrypts with AES‑CBC, stores encrypted bytes
-3) Download/Preview: user provides password → backend decrypts on demand, streams file (download) or inline (preview)
+- **Frontend (React + Vite)**  
+  Handles authentication flows (login/register) and the user dashboard.  
+  Communicates with the backend using JSON over REST APIs.
+
+- **Backend (FastAPI)**  
+  Exposes versioned REST endpoints under `/api/v1`.  
+  Responsible for authentication, file operations, encryption/decryption, and access control using JWT.
+
+- **Database (SQLite via SQLAlchemy)**  
+  Stores user data and file metadata.  
+  Designed so it can be easily swapped with PostgreSQL by changing the database URL.
+
+- **Reverse Proxy (Nginx, Dockerized)**  
+  Serves the frontend build as static files and proxies `/api` requests to the FastAPI backend.
+
+This separation keeps the system modular, easy to test, and production-ready.
+
+### Request Flow (Upload / Download)
+
+1. User logs in and receives a JWT access token.
+2. Frontend sends API requests with the token in the Authorization header.
+3. Backend validates ownership and permissions.
+4. Files are encrypted/decrypted on demand before storage or download.
+
 
 ## 🖼️ Demo & Screens
 
@@ -266,6 +274,3 @@ frontend/
 
 Issues and PRs are welcome. Roadmap items are great places to start.
 
-## 📄 License
-
-This project is provided as‑is for educational purposes. Add your preferred license (e.g., MIT) to the repository root.
