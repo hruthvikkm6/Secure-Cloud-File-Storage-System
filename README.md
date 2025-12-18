@@ -7,22 +7,20 @@
 [![JWT](https://img.shields.io/badge/Auth-JWT-000000?logo=jsonwebtokens&logoColor=white)](#)
 [![Security](https://img.shields.io/badge/Security-Argon2%20%7C%20AES--CBC-8A2BE2)](#)
 
-A production‑minded, minimal, and secure file storage app—think “mini Google Drive”—built with a modern stack:
+A production‑minded, secure file storage app — a "mini Google Drive" — built with a modern stack:
 
-- FastAPI + SQLAlchemy (Python) for a blazing‑fast, typed API
+- FastAPI + SQLAlchemy (Python) for a typed, high‑performance API
 - React + Vite (TypeScript) for a crisp UX
-- JWT auth, Argon2 password hashing, and server‑side file encryption (AES‑CBC with PBKDF2)
-- Dockerized with Nginx reverse proxy for a one‑command spin‑up
-
+- JWT auth, Argon2 password hashing, and server‑side file encryption (AES‑CBC via PBKDF2‑derived keys)
+- Dockerized with Nginx reverse proxy for one‑command spin‑up
 
 ## ✨ Highlights
 
-- Clean architecture with clear separation of concerns (API → Services → DB → Schemas)
-- End‑to‑end auth using OAuth2 password flow and JWT bearer tokens
-- Server‑side file encryption using a per‑file salt and IV
-- Simple, documented API with ready‑to‑copy curl examples
-- Dev experience: hot reload for both backend and frontend, Vite proxy for zero‑CORS friction
-
+- Clean, layered architecture (API → Services → DB → Schemas)
+- End‑to‑end JWT auth using OAuth2 password flow
+- Server‑side file encryption with per‑file salt and IV
+- New: Download, Delete, and Preview (image/pdf) with ownership checks
+- Dev experience: hot reloads, Vite proxy for zero‑CORS friction
 
 ## 🧩 Architecture
 
@@ -40,26 +38,20 @@ A production‑minded, minimal, and secure file storage app—think “mini Goog
 +---------------------+
 ```
 
-Request flow (upload):
+Request flow (upload/download/preview):
 1) User logs in → receives JWT
-2) User selects file + enters password → POST /files/upload (multipart)
-3) Backend derives key (PBKDF2), encrypts with AES‑CBC (per‑file salt + IV), stores encrypted bytes
-4) User can list files under their account
-
+2) Upload: user selects file + enters password → backend derives key (PBKDF2), encrypts with AES‑CBC, stores encrypted bytes
+3) Download/Preview: user provides password → backend decrypts on demand, streams file (download) or inline (preview)
 
 ## 🖼️ Demo & Screens
 
-- Dashboard and upload flow
-- Auth screens (Login / Register)
-
-Tip: Add your screenshots or a short GIF under `docs/` and link them here:
+Add screenshots or a short GIF under `docs/` and link them here:
 
 ```
 /docs/demo.gif
 /docs/screen-dashboard.png
 /docs/screen-login.png
 ```
-
 
 ## 🚀 Quick Start (Docker)
 
@@ -75,17 +67,16 @@ docker-compose up --build
 ```
 
 - Frontend: http://localhost:8080
-- Backend (direct): http://localhost:8000 (also proxied from the frontend container under `/api`)
+- Backend (direct): http://localhost:8000
 
 Data persistence: a Docker volume holds `mini_google_drive.db` (SQLite) across restarts.
-
 
 ## 🧪 Local Development (no Docker)
 
 Backend:
 ```
 python -m venv .venv
-source .venv/bin/activate   # Windows: .venv\\Scripts\\activate
+source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -r backend/requirements.txt
 cp backend/.env.example backend/.env
 # Edit backend/.env → set SECRET_KEY
@@ -100,7 +91,6 @@ npm run dev   # http://localhost:8080
 ```
 Vite dev server proxies `/api` → `http://127.0.0.1:8000` (see `frontend/vite.config.ts`).
 
-
 ## ⚙️ Configuration (backend/.env)
 
 - DATABASE_URL = `sqlite:///./mini_google_drive.db` (default)
@@ -108,6 +98,14 @@ Vite dev server proxies `/api` → `http://127.0.0.1:8000` (see `frontend/vite.c
 - ALGORITHM = `HS256` (default)
 - ACCESS_TOKEN_EXPIRE_MINUTES = `30` (default)
 
+## ✅ Features
+
+- Register and login with JWT bearer tokens
+- Secure upload with server‑side AES‑CBC encryption (key via PBKDF2)
+- Per‑user file listing
+- Download decrypted file on demand (password required)
+- Delete file (DB record + encrypted content)
+- Preview inline for safe types: PNG, JPG/JPEG, PDF (password required)
 
 ## 📚 API Reference (Base: `/api/v1`)
 
@@ -121,6 +119,7 @@ Content-Type: application/json
   "password": "strong_pw"
 }
 ```
+
 - Login
 ```
 POST /login
@@ -135,12 +134,13 @@ Response:
 }
 ```
 
-Files (requires `Authorization: Bearer <jwt>`)
+Files (Authorization: `Bearer <jwt>`)
 - List files
 ```
 GET /files
 ```
-- Upload file (server‑side encryption using user‑provided password)
+
+- Upload (encrypts with AES‑CBC; per‑file salt + IV)
 ```
 POST /files/upload
 Content-Type: multipart/form-data
@@ -148,23 +148,67 @@ Content-Type: multipart/form-data
 - password: <your login password>
 ```
 
+- Download (decrypts on demand; sends as attachment)
+```
+GET /files/{file_id}/download?password=<your login password>
+```
 
-## 🔐 Security & Privacy
+- Preview (decrypts on demand; inline response)
+```
+GET /files/{file_id}/preview?password=<your login password>
+# Only for: image/png, image/jpeg, application/pdf (.png/.jpg/.jpeg/.pdf)
+```
 
-- Password hashing: Argon2 (resistant to GPU cracking)
-- Auth: OAuth2 password flow with JWT bearer tokens
+- Delete (removes DB record and encrypted content)
+```
+DELETE /files/{file_id}
+```
+
+### Curl examples
+
+Assuming `TOKEN` contains the JWT access token.
+
+List
+```
+curl -H "Authorization: Bearer $TOKEN" http://localhost:8000/api/v1/files
+```
+
+Download
+```
+curl -L -H "Authorization: Bearer $TOKEN" \
+  "http://localhost:8000/api/v1/files/123/download?password=your_password" \
+  -o downloaded.bin
+```
+
+Preview (opens if you paste into browser); with curl, you’ll just receive the bytes
+```
+curl -L -H "Authorization: Bearer $TOKEN" \
+  "http://localhost:8000/api/v1/files/123/preview?password=your_password" \
+  -o preview.bin
+```
+
+Delete
+```
+curl -X DELETE -H "Authorization: Bearer $TOKEN" \
+  http://localhost:8000/api/v1/files/123
+```
+
+## 🔐 Security Notes
+
+- Password hashing: Argon2
+- Auth: JWT bearer tokens signed with `SECRET_KEY`
 - File encryption: AES‑CBC with per‑file IV and salt; keys derived via PBKDF2‑HMAC‑SHA256
-- Secrets: loaded from `backend/.env` (do not commit your real secrets)
-- Note: Download/decryption endpoints are intentionally not included yet to keep scope focused. See Roadmap.
+- Decryption is on demand in memory and streamed as needed
+- Preview is restricted to safe types (png, jpg/jpeg, pdf)
 
+Note: For simplicity and minimal changes, the download/preview password is passed via query string. In production, consider POSTing a short‑lived decryption token or using a form body to avoid logging sensitive data in URLs.
 
-## ⚡ Performance & DX
+## 🧠 Design Decisions
 
-- FastAPI + Uvicorn for high throughput
-- Minimal I/O on upload path; encryption done in‑memory
-- Vite dev server for instant HMR, Axios interceptors for token attachment
-- Nginx serves static SPA and proxies API in production containers
-
+- Additive changes only: upload and auth logic untouched; DB schema unchanged
+- Ownership is enforced on every file operation; non‑owners receive 403
+- SQLite by default; can be swapped with Postgres by changing `DATABASE_URL`
+- Nginx serves SPA and proxies API in containerized deployment
 
 ## 🗂️ Project Structure
 
@@ -183,46 +227,44 @@ frontend/
     services/      # Axios instance & helpers
 ```
 
+## 🧪 Manual Testing Guide
 
-## 🧠 Design Decisions
+1) Upload
+- Login, go to Dashboard, upload a file; enter your password when prompted for encryption.
 
-- Server‑side encryption ensures sensitive content never hits disk unencrypted
-- Per‑file salt + IV prevents key/IV reuse and supports strong cryptographic hygiene
-- JWT over cookies keeps the SPA stateless and simplifies deployment via Nginx
-- SQLite by default for simplicity; easily swap to Postgres via `DATABASE_URL`
+2) Download
+- In Dashboard, click Download → enter the same password you used for encryption.
+- Expected: Browser downloads decrypted file. Wrong password → `400` with clear error.
 
+3) Preview
+- Supported: .png, .jpg/.jpeg, .pdf
+- Click Preview → enter password.
+- Expected: Opens a new tab displaying the file inline. Unsupported type → `415` error.
+
+4) Delete
+- Click Delete → confirm.
+- Expected: File disappears from the list; API returns success message.
+
+## ⚡ Troubleshooting
+
+- 401 on any file endpoint → Ensure the Authorization header includes a valid `Bearer` token.
+- 400 on download/preview → Wrong password or corrupted file.
+- 415 on preview → File type not supported for inline preview.
+- CORS/dev proxy → Use `npm run dev`; Vite proxy forwards `/api` to the backend.
+- Rebuild containers after dependency changes → `docker-compose build --no-cache && docker-compose up`.
 
 ## 🧭 Roadmap
 
-- File download + decryption flow (with secure password handling)
-- File metadata (size, MIME), preview support, folders/tags
-- Pagination and search on the files list
-- Postgres support and migrations
-- Automated tests (pytest) for auth and file flows
-- CI pipeline and container vulnerability scanning
-
-
-## 🧪 Testing
-
-Scaffold exists under `backend/tests/`. To start adding tests:
-```
-pip install pytest
-pytest backend/tests -q
-```
-
-
-## 🧩 Troubleshooting
-
-- 401 errors on files endpoints → Ensure token is stored in `localStorage` and attached as `Authorization: Bearer <token>`
-- Login failing → Must send `username` and `password` as `application/x-www-form-urlencoded`
-- Dev CORS issues → Use `npm run dev` (Vite proxy handles `/api`)
-- Rebuild containers after dependency changes → `docker-compose build --no-cache && docker-compose up`
-
+- Optional secure download tokens to avoid password in query
+- Client‑side encryption flow
+- File metadata (size, type), preview thumbnails
+- Pagination and search
+- Postgres + Alembic migrations
+- Automated test suite (pytest) for auth and file flows
 
 ## 🙌 Contributing
 
-Issues and PRs are welcome. Ideas from the Roadmap section are great places to start.
-
+Issues and PRs are welcome. Roadmap items are great places to start.
 
 ## 📄 License
 

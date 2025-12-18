@@ -15,6 +15,7 @@ const Dashboard = () => {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [message, setMessage] = useState('');
+    const [loading, setLoading] = useState(false);
 
     const fetchFiles = async () => {
         try {
@@ -66,6 +67,61 @@ const Dashboard = () => {
         }
     };
 
+    const blobDownload = (blob: Blob, filename: string) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+    };
+
+    const handleDownload = async (file: ApiFile) => {
+        const pwd = window.prompt('Enter your login password to decrypt and download:');
+        if (!pwd) return;
+        try {
+            setLoading(true);
+            const resp = await api.get(`/files/${file.id}/download`, { params: { password: pwd }, responseType: 'blob' });
+            blobDownload(resp.data, file.filename);
+        } catch (err: any) {
+            setError(err.response?.data?.detail || 'Download failed.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handlePreview = async (file: ApiFile) => {
+        const pwd = window.prompt('Enter your login password to decrypt and preview:');
+        if (!pwd) return;
+        try {
+            setLoading(true);
+            const resp = await api.get(`/files/${file.id}/preview`, { params: { password: pwd }, responseType: 'blob' });
+            const blob = resp.data as Blob;
+            const url = window.URL.createObjectURL(blob);
+            window.open(url, '_blank');
+        } catch (err: any) {
+            setError(err.response?.data?.detail || 'Preview failed.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleDelete = async (file: ApiFile) => {
+        if (!window.confirm(`Delete ${file.filename}? This cannot be undone.`)) return;
+        try {
+            setLoading(true);
+            await api.delete(`/files/${file.id}`);
+            setMessage('File deleted successfully');
+            fetchFiles();
+        } catch (err: any) {
+            setError(err.response?.data?.detail || 'Delete failed.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <div>
             <h2>Dashboard</h2>
@@ -104,6 +160,7 @@ const Dashboard = () => {
                             <tr>
                                 <th>Filename</th>
                                 <th>Upload Date</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -111,6 +168,11 @@ const Dashboard = () => {
                                 <tr key={file.id}>
                                     <td>{file.filename}</td>
                                     <td>{new Date(file.created_at).toLocaleString()}</td>
+                                    <td>
+                                        <button onClick={() => handlePreview(file)}>Preview</button>
+                                        <button onClick={() => handleDownload(file)}>Download</button>
+                                        <button onClick={() => handleDelete(file)} className="danger">Delete</button>
+                                    </td>
                                 </tr>
                             ))}
                         </tbody>
