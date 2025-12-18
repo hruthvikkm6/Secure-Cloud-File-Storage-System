@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  # The Backend Service (FastAPI)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: mini-drive-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      # Mount a named volume to persist the SQLite database file outside the container
+      - db_data:/app/mini_google_drive.db
+    env_file:
+      - ./backend/.env
+    restart: unless-stopped
+
+  # The Frontend Service (React + Nginx)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: mini-drive-frontend
+    ports:
+      # Map host port 8080 to the Nginx container's port 80
+      - "8080:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+# Named volume for persisting the database
+volumes:
+  db_data:
+    driver: local

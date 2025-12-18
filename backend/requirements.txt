@@ -1,0 +1,10 @@
+# Added comment to invalidate Docker cache and force re-install
+fastapi
+uvicorn[standard]
+sqlalchemy
+pydantic[email]
+python-dotenv
+argon2-cffi
+python-jose[cryptography]
+cryptography
+python-multipart
