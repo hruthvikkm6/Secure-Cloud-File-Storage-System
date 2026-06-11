@@ -9,15 +9,25 @@ from app.db.database import get_db
 from app.services import auth_service
 from app.core.config import settings
 from app.core.security import create_access_token
+from app.core.rate_limit import rate_limit_login
 
 router = APIRouter()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/login")
 
-@router.post("/register", response_model=schemas.user.User, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/register",
+    response_model=schemas.user.User,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(rate_limit_login)]
+)
 def register_user(user: schemas.user.UserCreate, db: Session = Depends(get_db)):
     return auth_service.create_user(db=db, user=user)
 
-@router.post("/login", response_model=schemas.user.Token)
+@router.post(
+    "/login",
+    response_model=schemas.user.Token,
+    dependencies=[Depends(rate_limit_login)]
+)
 def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     user = auth_service.authenticate_user(db, email=form_data.username, password=form_data.password)
     if not user:

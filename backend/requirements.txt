@@ -8,3 +8,4 @@ argon2-cffi
 python-jose[cryptography]
 cryptography
 python-multipart
+pydantic-settings

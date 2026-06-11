@@ -6,13 +6,14 @@ const Navbar = () => {
 
     const handleLogout = () => {
         localStorage.removeItem('authToken');
-        // We use navigate and then force a reload to ensure the state is cleared everywhere
         navigate('/login');
     };
 
     return (
         <nav className="navbar">
-            <Link to="/" className="nav-brand">Mini Drive</Link>
+            <Link to="/" className="nav-brand">
+                <span className="nav-brand-icon">🛡️</span> Aegis
+            </Link>
             <ul className="nav-links">
                 {token ? (
                     <li>

@@ -13,3 +13,6 @@ class File(FileBase):
     owner_id: int
     class Config:
         from_attributes = True
+
+class FileDecryptRequest(BaseModel):
+    password: str
