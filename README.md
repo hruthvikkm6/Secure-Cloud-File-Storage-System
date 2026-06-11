@@ -1,274 +1,890 @@
 # Secure Cloud File Storage System 🚀
 
-[![FastAPI](https://img.shields.io/badge/Backend-FastAPI-05998B?logo=fastapi&logoColor=white)](#)
-[![React](https://img.shields.io/badge/Frontend-React-61DAFB?logo=react&logoColor=black)](#)
-[![TypeScript](https://img.shields.io/badge/Language-TypeScript-3178C6?logo=typescript&logoColor=white)](#)
-[![Docker](https://img.shields.io/badge/Container-Docker-2496ED?logo=docker&logoColor=white)](#)
-[![JWT](https://img.shields.io/badge/Auth-JWT-000000?logo=jsonwebtokens&logoColor=white)](#)
-[![Security](https://img.shields.io/badge/Security-Argon2%20%7C%20AES--CBC-8A2BE2)](#)
+> FastAPI • React • TypeScript • Docker • JWT • AES-256-GCM • Argon2id
 
-A production-minded, secure cloud file storage system inspired by Google Drive, built with a modern, security-first stack:
+A production-grade, security-first cloud file storage platform inspired by Google Drive, built with modern backend architecture, authenticated encryption, secure decryption workflows, and a premium cyber-themed user experience.
 
-- FastAPI + SQLAlchemy (Python) for a typed, high‑performance API
-- React + Vite (TypeScript) for a crisp UX
-- JWT auth, Argon2 password hashing, and server‑side file encryption (AES‑CBC via PBKDF2‑derived keys)
-- Dockerized with Nginx reverse proxy for one‑command spin‑up
+---
 
-## ✨ Highlights
+## ✨ What's New
 
-- Clean, layered architecture (API → Services → DB → Schemas)
-- End‑to‑end JWT auth using OAuth2 password flow
-- Server‑side file encryption with per‑file salt and IV
-- New: Download, Delete, and Preview (image/pdf) with ownership checks
-- Dev experience: hot reloads, Vite proxy for zero‑CORS friction
+This release introduces enterprise-grade security enhancements, authenticated encryption, secure decryption tickets, brute-force protection, and a complete Cyber Aegis UI redesign.
 
-## 🧩 Architecture Overview
+### 🔐 Security Upgrades
 
-The application follows a simple and practical client–server architecture.
+- Upgraded file encryption from **AES-256-CBC** to **AES-256-GCM**
+- Built-in ciphertext authentication and tamper detection
+- Legacy AES-CBC file compatibility maintained
+- Single-Use Secure Access Tickets (STAT)
+- Eliminated password exposure in URL query strings
+- Sliding-window brute-force protection
+- Thread-safe ticket management
+- Automatic ticket expiration and replay prevention
 
-- **Frontend (React + Vite)**  
-  Handles authentication flows (login/register) and the user dashboard.  
-  Communicates with the backend using JSON over REST APIs.
+### 🎨 User Experience Upgrades
 
-- **Backend (FastAPI)**  
-  Exposes versioned REST endpoints under `/api/v1`.  
-  Responsible for authentication, file operations, encryption/decryption, and access control using JWT.
+- Cyber-themed glassmorphism UI
+- Drag-and-drop upload interface
+- Real-time password strength meter
+- Cryptographic telemetry HUD
+- Secure inline previews
+- Modern animations and micro-interactions
+- Responsive dashboard redesign
 
-- **Database (SQLite via SQLAlchemy)**  
-  Stores user data and file metadata.  
-  Designed so it can be easily swapped with PostgreSQL by changing the database URL.
+---
 
-- **Reverse Proxy (Nginx, Dockerized)**  
-  Serves the frontend build as static files and proxies `/api` requests to the FastAPI backend.
+# 🧩 Architecture Overview
 
-This separation keeps the system modular, easy to test, and production-ready.
+The application follows a secure layered architecture.
 
-### Request Flow (Upload / Download)
+## Frontend (React + Vite + TypeScript)
 
-1. User logs in and receives a JWT access token.
-2. Frontend sends API requests with the token in the Authorization header.
-3. Backend validates ownership and permissions.
-4. Files are encrypted/decrypted on demand before storage or download.
+Responsible for:
 
+- Authentication flows
+- Dashboard experience
+- Secure file previews
+- Drag-and-drop uploads
+- Password strength analysis
+- Ticket-based file access
 
-## 🚀 Quick Start (Docker)
+Communicates with the backend through REST APIs.
 
-1) Copy and edit environment file:
-```
-cp backend/.env.example backend/.env
-# Edit backend/.env and set a strong SECRET_KEY (e.g. `openssl rand -hex 32`)
-```
+---
 
-2) Build and run:
-```
-docker-compose up --build
-```
+## Backend (FastAPI)
 
-- Frontend: http://localhost:8080
-- Backend (direct): http://localhost:8000
+Responsible for:
 
-Data persistence: a Docker volume holds `secure_cloud_storage.db` (SQLite) across restarts.
+- JWT authentication
+- File encryption/decryption
+- Secure ticket issuance
+- Access control
+- Rate limiting
+- Ownership validation
+- Metadata management
 
-## 🧪 Local Development (no Docker)
+All APIs are exposed under:
 
-Backend:
-```
-python -m venv .venv
-source .venv/bin/activate   # Windows: .venv\Scripts\activate
-pip install -r backend/requirements.txt
-cp backend/.env.example backend/.env
-# Edit backend/.env → set SECRET_KEY
-uvicorn backend.app.main:app --reload --port 8000
+```text
+/api/v1
 ```
 
-Frontend:
+---
+
+## Database (SQLite via SQLAlchemy)
+
+Stores:
+
+- User accounts
+- File metadata
+- Ownership information
+
+Can be easily replaced with PostgreSQL by changing the database URL.
+
+---
+
+## Reverse Proxy (Nginx)
+
+Containerized deployment includes Nginx which:
+
+- Serves React static assets
+- Proxies API traffic
+- Improves deployment consistency
+
+---
+
+# 🔐 Security Architecture
+
+## Authentication
+
+- JWT Bearer Tokens
+- OAuth2 Password Flow
+- Argon2 Password Hashing
+
+---
+
+## File Encryption
+
+### Current Encryption Standard
+
+```text
+AES-256-GCM
 ```
-cd frontend
-npm install
-npm run dev   # http://localhost:8080
+
+Benefits:
+
+- Confidentiality
+- Integrity
+- Authentication
+- Tamper Detection
+
+Each file receives:
+
+- Unique Salt
+- Unique Nonce (IV)
+- Authentication Tag
+
+Keys are derived using:
+
+```text
+PBKDF2-HMAC-SHA256
 ```
-Vite dev server proxies `/api` → `http://127.0.0.1:8000` (see `frontend/vite.config.ts`).
 
-## ⚙️ Configuration (backend/.env)
+---
 
-- DATABASE_URL = `sqlite:///./mini_google_drive.db` (default)
-- SECRET_KEY = JWT signing key (required)
-- ALGORITHM = `HS256` (default)
-- ACCESS_TOKEN_EXPIRE_MINUTES = `30` (default)
+## Legacy File Compatibility
 
-## ✅ Features
+Previously uploaded files remain accessible.
 
-- Register and login with JWT bearer tokens
-- Secure upload with server‑side AES‑CBC encryption (key via PBKDF2)
-- Per‑user file listing
-- Download decrypted file on demand (password required)
-- Delete file (DB record + encrypted content)
-- Preview inline for safe types: PNG, JPG/JPEG, PDF (password required)
+The system automatically detects encryption mode:
 
-## 📚 API Reference (Base: `/api/v1`)
+| IV Length | Encryption Mode |
+| ---------- | ---------------- |
+| 12 Bytes | AES-256-GCM |
+| 16 Bytes | AES-256-CBC (Legacy) |
 
-Auth
-- Register
+No migration is required.
+
+---
+
+## Secure Ticket Architecture (STAT)
+
+### Previous Approach
+
+```http
+GET /files/{id}/download?password=user_password
 ```
-POST /register
-Content-Type: application/json
+
+This exposed passwords through:
+
+- Browser history
+- Access logs
+- Reverse proxy logs
+- Monitoring systems
+
+---
+
+### New Secure Flow
+
+#### Step 1 — Request Ticket
+
+```http
+POST /files/{file_id}/ticket
+```
+
+Body:
+
+```json
 {
-  "email": "user@example.com",
-  "password": "strong_pw"
+  "password": "user_password"
 }
 ```
 
-- Login
+---
+
+#### Step 2 — Server Validation
+
+Server:
+
+- Verifies password
+- Derives encryption key
+- Generates secure UUID ticket
+- Stores ticket in memory for 60 seconds
+
+---
+
+#### Step 3 — Redeem Ticket
+
+Download:
+
+```http
+GET /files/{file_id}/download?ticket_id=<uuid>
 ```
+
+Preview:
+
+```http
+GET /files/{file_id}/preview?ticket_id=<uuid>
+```
+
+---
+
+#### Step 4 — Ticket Destruction
+
+The ticket is:
+
+- Single-use
+- Immediately deleted
+- Protected against replay attacks
+
+---
+
+## Brute Force Protection
+
+The ticket endpoint is protected using a sliding-window rate limiter.
+
+Limit:
+
+```text
+10 attempts per minute
+```
+
+This significantly reduces password-guessing attacks.
+
+---
+
+# 🚀 Quick Start (Docker)
+
+## Prerequisites
+
+Install:
+
+- Docker
+- Docker Compose
+
+---
+
+## Configure Environment
+
+Create environment file:
+
+```bash
+cp backend/.env.example backend/.env
+```
+
+Edit:
+
+```env
+SECRET_KEY=<your-random-secret>
+```
+
+Generate a secure key:
+
+```bash
+openssl rand -hex 32
+```
+
+---
+
+## Build and Run
+
+```bash
+docker-compose up --build
+```
+
+---
+
+## Access Application
+
+Frontend:
+
+```text
+http://localhost:8080
+```
+
+Backend:
+
+```text
+http://localhost:8000
+```
+
+---
+
+# 🧪 Local Development
+
+## Requirements
+
+### Backend
+
+- Python 3.9+
+
+### Frontend
+
+- Node.js 18+
+
+---
+
+# Backend Setup
+
+Navigate to backend:
+
+```bash
+cd backend
+```
+
+Create virtual environment:
+
+### Windows
+
+```powershell
+python -m venv .venv
+.venv\Scripts\activate
+```
+
+### Linux / macOS
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+```
+
+Install dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+Create environment file:
+
+### Windows
+
+```powershell
+copy .env.example .env
+```
+
+### Linux/macOS
+
+```bash
+cp .env.example .env
+```
+
+Configure:
+
+```env
+SECRET_KEY=<your-secret>
+```
+
+Start FastAPI:
+
+```bash
+uvicorn app.main:app --reload --port 8000
+```
+
+Backend:
+
+```text
+http://localhost:8000
+```
+
+---
+
+# Frontend Setup
+
+Open a new terminal:
+
+```bash
+cd frontend
+```
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Run development server:
+
+```bash
+npm run dev
+```
+
+Frontend:
+
+```text
+http://localhost:8080
+```
+
+---
+
+## Development Proxy
+
+Vite automatically proxies:
+
+```text
+/api
+```
+
+to:
+
+```text
+http://127.0.0.1:8000
+```
+
+No CORS configuration is required during development.
+
+---
+
+# ⚙️ Configuration
+
+Example `.env`
+
+```env
+DATABASE_URL=sqlite:///./mini_google_drive.db
+
+SECRET_KEY=your-secret-key
+
+ALGORITHM=HS256
+
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+```
+
+---
+
+# 📚 API Reference
+
+Base URL:
+
+```text
+/api/v1
+```
+
+---
+
+# Authentication
+
+## Register
+
+```http
+POST /register
+```
+
+Request:
+
+```json
+{
+  "email": "user@example.com",
+  "password": "strong_password"
+}
+```
+
+---
+
+## Login
+
+```http
 POST /login
-Content-Type: application/x-www-form-urlencoded
-username=user@example.com&password=strong_pw
 ```
+
+Content-Type:
+
+```text
+application/x-www-form-urlencoded
+```
+
+Body:
+
+```text
+username=user@example.com
+password=strong_password
+```
+
 Response:
-```
+
+```json
 {
   "access_token": "<jwt>",
   "token_type": "bearer"
 }
 ```
 
-Files (Authorization: `Bearer <jwt>`)
-- List files
+---
+
+# File Operations
+
+All file endpoints require:
+
+```http
+Authorization: Bearer <JWT>
 ```
+
+---
+
+## List Files
+
+```http
 GET /files
 ```
 
-- Upload (encrypts with AES‑CBC; per‑file salt + IV)
-```
+---
+
+## Upload File
+
+```http
 POST /files/upload
-Content-Type: multipart/form-data
-- file: <binary>
-- password: <your login password>
 ```
 
-- Download (decrypts on demand; sends as attachment)
-```
-GET /files/{file_id}/download?password=<your login password>
+Form Data:
+
+```text
+file=<binary>
+password=<encryption_password>
 ```
 
-- Preview (decrypts on demand; inline response)
-```
-GET /files/{file_id}/preview?password=<your login password>
-# Only for: image/png, image/jpeg, application/pdf (.png/.jpg/.jpeg/.pdf)
+Encryption:
+
+```text
+AES-256-GCM
 ```
 
-- Delete (removes DB record and encrypted content)
+---
+
+## Request Decryption Ticket
+
+```http
+POST /files/{file_id}/ticket
 ```
+
+Request:
+
+```json
+{
+  "password": "your_password"
+}
+```
+
+Response:
+
+```json
+{
+  "ticket_id": "uuid"
+}
+```
+
+---
+
+## Download File
+
+```http
+GET /files/{file_id}/download?ticket_id=<uuid>
+```
+
+Returns decrypted file attachment.
+
+---
+
+## Preview File
+
+```http
+GET /files/{file_id}/preview?ticket_id=<uuid>
+```
+
+Supported types:
+
+- PNG
+- JPG
+- JPEG
+- PDF
+
+Returns decrypted inline preview.
+
+---
+
+## Delete File
+
+```http
 DELETE /files/{file_id}
 ```
 
-### Curl examples
+Removes:
 
-Assuming `TOKEN` contains the JWT access token.
+- File metadata
+- Encrypted storage object
 
-List
+---
+
+# 🔐 Security Features
+
+### Authentication
+
+- JWT Authentication
+- Argon2 Password Hashing
+
+### Encryption
+
+- AES-256-GCM
+- PBKDF2-HMAC-SHA256
+- Per-file Salt
+- Per-file Nonce
+- Authentication Tags
+
+### Access Protection
+
+- Ownership Enforcement
+- Single-Use Decryption Tickets
+- Ticket Expiration
+- Replay Attack Prevention
+
+### Rate Limiting
+
+```text
+10 decryption attempts/minute
 ```
-curl -H "Authorization: Bearer $TOKEN" http://localhost:8000/api/v1/files
+
+### Secure Previews
+
+Supported:
+
+- PNG
+- JPG
+- JPEG
+- PDF
+
+---
+
+# 🎨 User Interface Features
+
+## Cyber Aegis Dashboard
+
+Features:
+
+- Glassmorphism design
+- Neon cyber styling
+- Responsive layout
+
+---
+
+## Drag & Drop Uploads
+
+Supports:
+
+- Dragging files directly onto upload zone
+- Visual hover feedback
+- Animated upload states
+
+---
+
+## Password Strength Meter
+
+Provides instant feedback:
+
+```text
+Weak → Medium → Strong
 ```
 
-Download
-```
-curl -L -H "Authorization: Bearer $TOKEN" \
-  "http://localhost:8000/api/v1/files/123/download?password=your_password" \
-  -o downloaded.bin
-```
+---
 
-Preview (opens if you paste into browser); with curl, you’ll just receive the bytes
-```
-curl -L -H "Authorization: Bearer $TOKEN" \
-  "http://localhost:8000/api/v1/files/123/preview?password=your_password" \
-  -o preview.bin
-```
+## Cryptographic Telemetry HUD
 
-Delete
-```
-curl -X DELETE -H "Authorization: Bearer $TOKEN" \
-  http://localhost:8000/api/v1/files/123
-```
+Displays active security mechanisms:
 
-## 🔐 Security Notes
+- AES-256-GCM
+- Argon2id
+- PBKDF2-HMAC
+- KDF Iterations
+- Single-Use Tickets
+- Storage utilization
 
-- Password hashing: Argon2
-- Auth: JWT bearer tokens signed with `SECRET_KEY`
-- File encryption: AES‑CBC with per‑file IV and salt; keys derived via PBKDF2‑HMAC‑SHA256
-- Decryption is on demand in memory and streamed as needed
-- Preview is restricted to safe types (png, jpg/jpeg, pdf)
+---
 
-Note: For simplicity and minimal changes, the download/preview password is passed via query string. In production, consider POSTing a short‑lived decryption token or using a form body to avoid logging sensitive data in URLs.
+## Secure Inline Preview Modal
 
-## 🧠 Design Decisions
+Files are:
 
-- Additive changes only: upload and auth logic untouched; DB schema unchanged
-- Ownership is enforced on every file operation; non‑owners receive 403
-- SQLite by default; can be swapped with Postgres by changing `DATABASE_URL`
-- Nginx serves SPA and proxies API in containerized deployment
+- Decrypted in memory
+- Converted into Blob URLs
+- Rendered securely
 
-## 🗂️ Project Structure
+Supported:
 
-```
+- PDF
+- PNG
+- JPG
+- JPEG
+
+---
+
+# 🗂️ Project Structure
+
+```text
 backend/
-  app/
-    api/v1/        # REST endpoints (auth, files)
-    core/          # security & settings
-    db/            # SQLAlchemy engine & models
-    schemas/       # Pydantic request/response models
-    services/      # business logic (auth, file)
+│
+├── app/
+│   ├── api/v1/
+│   ├── core/
+│   ├── db/
+│   ├── schemas/
+│   └── services/
+│
 frontend/
-  src/
-    pages/         # Login, Register, Dashboard
-    components/    # Navbar, shared UI
-    services/      # Axios instance & helpers
+│
+├── src/
+│   ├── pages/
+│   ├── components/
+│   ├── services/
+│   └── assets/
+│
+docker-compose.yml
 ```
 
-## 🧪 Manual Testing Guide
+---
 
-1) Upload
-- Login, go to Dashboard, upload a file; enter your password when prompted for encryption.
+# 🧪 Manual Testing Guide
 
-2) Download
-- In Dashboard, click Download → enter the same password you used for encryption.
-- Expected: Browser downloads decrypted file. Wrong password → `400` with clear error.
+## Upload
 
-3) Preview
-- Supported: .png, .jpg/.jpeg, .pdf
-- Click Preview → enter password.
-- Expected: Opens a new tab displaying the file inline. Unsupported type → `415` error.
+1. Login
+2. Open Dashboard
+3. Upload file
+4. Enter encryption password
 
-4) Delete
-- Click Delete → confirm.
-- Expected: File disappears from the list; API returns success message.
+Expected:
 
-## ⚡ Troubleshooting
+```text
+File uploads successfully.
+```
 
-- 401 on any file endpoint → Ensure the Authorization header includes a valid `Bearer` token.
-- 400 on download/preview → Wrong password or corrupted file.
-- 415 on preview → File type not supported for inline preview.
-- CORS/dev proxy → Use `npm run dev`; Vite proxy forwards `/api` to the backend.
-- Rebuild containers after dependency changes → `docker-compose build --no-cache && docker-compose up`.
+---
 
-## 🧭 Roadmap
+## Download
 
-- Optional secure download tokens to avoid password in query
-- Client‑side encryption flow
-- File metadata (size, type), preview thumbnails
-- Pagination and search
-- Postgres + Alembic migrations
-- Automated test suite (pytest) for auth and file flows
+1. Click Download
+2. Enter password
 
-## 🙌 Contributing
+Expected:
 
-Issues and PRs are welcome. Roadmap items are great places to start.
+```text
+Ticket issued
+File downloaded successfully
+```
 
-### 👤 Author
+Wrong password:
 
-**Hruthvik K M**  
-- 🔗 LinkedIn: https://www.linkedin.com/in/hruthvikkm/  
-- 💻 GitHub: https://github.com/hruthvikkm6  
-- 📦 Project Repo: https://github.com/hruthvikkm6/Secure-Cloud-File-Storage-System
+```text
+400 Bad Request
+```
 
+---
 
+## Preview
+
+1. Click Preview
+2. Enter password
+
+Expected:
+
+```text
+Preview opens successfully
+```
+
+Unsupported type:
+
+```text
+415 Unsupported Media Type
+```
+
+---
+
+## Delete
+
+1. Click Delete
+2. Confirm action
+
+Expected:
+
+```text
+File removed successfully
+```
+
+---
+
+# ⚡ Troubleshooting
+
+### 401 Unauthorized
+
+Verify:
+
+```http
+Authorization: Bearer <token>
+```
+
+---
+
+### 400 Bad Request
+
+Possible causes:
+
+- Incorrect password
+- Expired ticket
+- Corrupted file
+
+---
+
+### 429 Too Many Requests
+
+Triggered by:
+
+```text
+More than 10 decryption attempts/minute
+```
+
+Wait before retrying.
+
+---
+
+### 415 Unsupported Media Type
+
+Preview supports only:
+
+```text
+PNG
+JPG
+JPEG
+PDF
+```
+
+---
+
+### Docker Rebuild
+
+```bash
+docker-compose build --no-cache
+docker-compose up
+```
+
+---
+
+# 🧭 Roadmap
+
+- Client-side encryption
+- PostgreSQL support
+- Alembic migrations
+- Search and filtering
+- File thumbnails
+- Pagination
+- Shared links
+- MFA Authentication
+- Audit logging
+- Automated test suite
+
+---
+
+# 🙌 Contributing
+
+Issues and Pull Requests are welcome.
+
+Security improvements, bug fixes, and feature enhancements are encouraged.
+
+---
+
+# 👤 Author
+
+**Hruthvik K M**
+
+### LinkedIn
+
+https://www.linkedin.com/in/hruthvikkm/
+
+### GitHub
+
+https://github.com/hruthvikkm6
+
+### Project Repository
+
+https://github.com/hruthvikkm6/Secure-Cloud-File-Storage-System
+
+---
+
+## ⭐ Support
+
+If you found this project useful, consider giving the repository a star.
